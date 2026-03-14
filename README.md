@@ -1,9 +1,9 @@
-# Claude Code Skills — CodeIgniter 4
+# Claude Code Skills: CodeIgniter 4
 
-A pair of Claude Code skills for building with CodeIgniter 4. Designed to give Claude a solid, accurate understanding of the CI4 framework so it stops reaching for Laravel patterns.
+A pair of Claude Code skills for building with CodeIgniter 4. Designed to give Claude a solid, accurate understanding of the CI4 framework.
 
-- **`/ci4`** — Core CI4 framework: MVC conventions, routing, controllers, models, query builder, views, migrations, filters, Spark CLI, and Shield auth.
-- **`/ci4-api`** — Building robust REST APIs with CI4: response envelopes, versioning, token auth, validation, rate limiting, CORS, and webhooks.
+- **`/ci4`** - Core CI4 framework: MVC conventions, routing, controllers, models, query builder, views, migrations, filters, Spark CLI, and Shield auth.
+- **`/ci4-api`** - Building robust REST APIs with CI4: response envelopes, versioning, token auth, validation, rate limiting, CORS, and webhooks.
 
 ---
 
@@ -12,19 +12,19 @@ A pair of Claude Code skills for building with CodeIgniter 4. Designed to give C
 Clone this repo directly into your Claude Code skills directory:
 
 ```bash
-git clone https://github.com/YOUR_USERNAME/YOUR_REPO_NAME ~/.claude/skills/codeigniter4
+git clone https://github.com/enlivenapp/Codeigniter4-App-and-API-Skills-for-Claude-Code.git ~/.claude/skills/codeigniter4
 ```
 
 Or if you already have other skills and want to add just these:
 
 ```bash
 cd ~/.claude/skills
-git clone https://github.com/YOUR_USERNAME/YOUR_REPO_NAME
-cp -r YOUR_REPO_NAME/ci4 .
-cp -r YOUR_REPO_NAME/ci4-api .
+git clone https://github.com/enlivenapp/Codeigniter4-App-and-API-Skills-for-Claude-Code.git
+cp -r Codeigniter4-App-and-API-Skills-for-Claude-Code/ci4 .
+cp -r Codeigniter4-App-and-API-Skills-for-Claude-Code/ci4-api .
 ```
 
-Restart Claude Code. The skills are now available as `/ci4` and `/ci4-api`.
+Restart Claude Code. The skills are now available as `/ci4` and `/ci4-api`. In your Claude Code session, simply type `/ci4` or `/ci4-api` to invoke the relevant skill. Claude will load the full framework reference and apply it to your project automatically.
 
 ---
 
@@ -37,7 +37,7 @@ Start here every time. This gets you to a known, working base before writing any
 - PHP 8.1+
 - Composer
 - MySQL (or another supported DB)
-- A web server (Apache/Nginx) **or** use `php spark serve` for local dev
+- A web server (Apache/Nginx) or use `php spark serve` for local dev
 
 ### 1. Create the Project
 
@@ -94,7 +94,7 @@ Make sure your web server has URL rewriting enabled (Apache `.htaccess` is inclu
 php spark serve
 ```
 
-Visit `http://localhost:8080` — you should see the CI4 welcome page.
+Visit `http://localhost:8080` and you should see the CI4 welcome page.
 
 > **Never use `spark serve` in production.** It is single-threaded and not suitable for real traffic. Use Apache or Nginx.
 
@@ -122,7 +122,7 @@ This command:
 - Publishes `Auth.php`, `AuthGroups.php`, and `AuthToken.php` to `app/Config/`
 - Wires up auth helpers in `app/Config/Autoload.php`
 - Adds Shield routes to `app/Config/Routes.php`
-- Prompts to run migrations — say **yes**
+- Prompts to run migrations. Say **yes**.
 
 ### 3. Run Migrations (if not run during setup)
 
@@ -131,11 +131,11 @@ php spark migrate --all
 ```
 
 Shield creates these tables:
-- `auth_identities` — emails, usernames, passwords
-- `auth_tokens` — personal access tokens (for API auth)
-- `auth_token_logins` — token login history
-- `auth_groups_users` — user group assignments
-- `auth_permissions_users` — per-user permission overrides
+- `auth_identities` - emails, usernames, passwords
+- `auth_tokens` - personal access tokens (for API auth)
+- `auth_token_logins` - token login history
+- `auth_groups_users` - user group assignments
+- `auth_permissions_users` - per-user permission overrides
 
 Verify with:
 ```bash
@@ -144,16 +144,19 @@ php spark migrate:status
 
 ### 4. Configure Groups
 
-Edit `app/Config/AuthGroups.php` to define your groups. Example:
+Edit `app/Config/AuthGroups.php` to define your groups. Shield ships with these defaults:
 
 ```php
 public array $groups = [
-    'superadmin'       => ['title' => 'Super Admin',      'description' => 'Full platform access.'],
-    'admin'            => ['title' => 'Administrator',    'description' => 'Administrative access.'],
-    'customer_service' => ['title' => 'Customer Service', 'description' => 'Support staff.'],
-    'user'             => ['title' => 'User',             'description' => 'Standard user.'],
+    'superadmin' => ['title' => 'Super Admin', 'description' => 'Complete control of the site.'],
+    'admin'      => ['title' => 'Admin',       'description' => 'Day to day administrators of the site.'],
+    'developer'  => ['title' => 'Developer',   'description' => 'Site programmers.'],
+    'user'       => ['title' => 'User',        'description' => 'General users of the site. Often customers.'],
+    'beta'       => ['title' => 'Beta User',   'description' => 'Has access to beta-level features.'],
 ];
 ```
+
+Add, remove, or rename groups to match your application's needs.
 
 ### 5. Create Your First Admin User
 
@@ -164,7 +167,7 @@ php spark shield:user create
 php spark shield:user addgroup <username> superadmin
 ```
 
-**Programmatic (seeder — good for repeatable dev environments):**
+**Programmatic (seeder - good for repeatable dev environments):**
 
 ```bash
 php spark make:seeder AdminSeeder
@@ -217,7 +220,7 @@ php spark shield:user addgroup <username> superadmin
 php spark serve
 ```
 
-You now have a working CI4 + Shield installation. Open `/ci4` or `/ci4-api` in Claude Code and start building.
+You now have a working CI4 + Shield installation. Type `/ci4` or `/ci4-api` in your Claude Code session to get started.
 
 ---
 
