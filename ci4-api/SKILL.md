@@ -1,7 +1,7 @@
 ---
 name: ci4-api
 description: Building robust, portable REST APIs with CodeIgniter 4. Use when creating or working with CI4 API controllers, JSON responses, API versioning, token authentication, request validation, error handling, rate limiting, or webhooks. Activates on mentions of "CI4 API", "REST API", "API controller", "api/v1", "Bearer token", "webhook", or "JSON response" in a CI4 context.
-version: 1.0.0
+version: 1.1.0
 ---
 
 # CodeIgniter 4 — REST API Reference
@@ -113,13 +113,18 @@ class BaseApiController extends Controller
     // ─── Auth Helpers ────────────────────────────────────────────────
 
     /**
-     * Returns the authenticated user (token auth) or aborts with 401.
+     * Returns the authenticated user (token auth), or returns a 401 response.
+     * IMPORTANT: Callers must `return` the result when the user is null:
+     *   $user = $this->requireAuth();
+     *   if ($user instanceof ResponseInterface) return $user;
+     *
+     * Alternatively use the two-liner pattern shown below.
      */
-    protected function requireAuth(): \CodeIgniter\Shield\Entities\User
+    protected function requireAuth(): \CodeIgniter\Shield\Entities\User|\CodeIgniter\HTTP\ResponseInterface
     {
         $user = auth('tokens')->user();
         if (!$user) {
-            $this->forbidden();  // exits
+            return $this->unauthorized('Unauthorized.');
         }
         return $user;
     }
@@ -396,6 +401,7 @@ public function login(): ResponseInterface
 public function logout(): ResponseInterface
 {
     $user = $this->requireAuth();
+    if ($user instanceof ResponseInterface) return $user;
     // Revoke the current token
     $user->revokeAccessToken(auth('tokens')->getPayload());
     return $this->success(null, 'Logged out.');
@@ -408,6 +414,7 @@ public function logout(): ResponseInterface
 public function me(): ResponseInterface
 {
     $user = $this->requireAuth();
+    if ($user instanceof ResponseInterface) return $user;
     return $this->success([
         'id'     => $user->id,
         'name'   => $user->name,
@@ -819,6 +826,7 @@ Client navigates with `?page=2&per_page=20`.
 
 ## Common Pitfalls
 
+- **`requireAuth()` returns a union type** — it returns either a `User` or a `ResponseInterface` (on auth failure). Always check: `if ($user instanceof ResponseInterface) return $user;` before using `$user`. Calling `$user->id` without this check causes a fatal error when unauthenticated.
 - **`getBody()` returns `array`** — use `$body['key']`, not `$body->key`.
 - **Never type-hint override params** — `show($id = null)` not `show(int $id = null)`. Breaks ResourceController parent signature.
 - **`format()` name conflict** — `ResourceController` has a `protected format()` method. Never define `private function format()` in a subclass — PHP throws an access level conflict fatal error.

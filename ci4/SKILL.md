@@ -1,7 +1,7 @@
 ---
 name: ci4
 description: Comprehensive CodeIgniter 4 framework skill. Use when working with any CodeIgniter 4 project — routing, controllers, models, views, query builder, migrations, filters, services, Spark CLI, and Shield auth. Activates on mentions of "CodeIgniter", "CI4", "spark", "CI4 model", "CI4 controller", "CI4 route", or any CI4-specific pattern.
-version: 1.0.0
+version: 1.1.0
 ---
 
 # CodeIgniter 4 — Complete Framework Reference
@@ -514,11 +514,90 @@ $rows  = $query->getResult();
 $query = $db->query("SELECT * FROM users WHERE email = :email:", ['email' => $email]);
 ```
 
+### Batch Operations
+```php
+// Insert multiple rows at once
+$data = [
+    ['name' => 'Alice', 'email' => 'alice@example.com'],
+    ['name' => 'Bob',   'email' => 'bob@example.com'],
+];
+$builder->insertBatch($data);   // returns number of rows inserted
+
+// Update multiple rows at once (constraints determine which row to update)
+$data = [
+    ['id' => 1, 'name' => 'Alice Updated'],
+    ['id' => 2, 'name' => 'Bob Updated'],
+];
+$builder->updateBatch($data, 'id');  // second arg = match column
+```
+
+**Note:** `insertBatch()` bypasses model `$allowedFields` — pass only the columns you intend to insert.
+
 ### Subqueries
 ```php
 $subquery = $db->table('orders')->select('user_id')->where('total >', 100);
 $builder->whereIn('id', $subquery);
 ```
+
+### Debugging
+```php
+// Get the compiled SQL without executing (bool $reset = true)
+$sql = $builder->where('active', 1)->getCompiledSelect();
+// → "SELECT * FROM `users` WHERE `active` = 1"
+
+// Reset = false preserves the query for continued chaining
+$sql = $builder->where('active', 1)->getCompiledSelect(false);
+$rows = $builder->limit(10)->get()->getResult();
+```
+
+---
+
+## Transactions
+
+Transactions wrap multiple queries so they either all succeed or all roll back.
+
+```php
+$db = \Config\Database::connect();
+
+$db->transStart();
+
+$db->table('orders')->insert(['user_id' => 1, 'total' => 50.00]);
+$db->table('ticket_reservations')->insert(['order_id' => $db->insertID(), 'qty' => 2]);
+
+if ($db->transStatus() === false) {
+    // Something failed mid-transaction — transComplete() will roll back
+}
+
+$db->transComplete(); // commits on success, rolls back on failure
+```
+
+### Exception Mode
+```php
+// Throw an exception on failure instead of silently rolling back
+$db->transException(true)->transStart();
+
+try {
+    $db->table('orders')->insert([...]);
+    $db->table('tickets')->insert([...]);
+    $db->transComplete();
+} catch (\Throwable $e) {
+    $db->transRollback();
+    // handle error
+}
+```
+
+### Manual Control
+```php
+$db->transBegin();    // lower-level start (transStart wraps this)
+// ... queries ...
+$db->transCommit();   // explicit commit
+$db->transRollback(); // explicit rollback
+```
+
+### Notes
+- `transStart()` is the recommended high-level wrapper; it calls `transBegin()` internally.
+- Nested transactions use reference counting (`transDepth`) — the outermost `transComplete()` commits.
+- `transStatus()` returns `false` if any query in the transaction failed.
 
 ---
 
