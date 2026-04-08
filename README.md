@@ -1,9 +1,12 @@
 # Claude Code Skills: CodeIgniter 4
 
-A pair of Claude Code skills for building with CodeIgniter 4. Designed to give Claude a solid, accurate understanding of the CI4 framework.
+A trio of Claude Code skills for building with CodeIgniter 4. Designed to give Claude a solid, accurate understanding of the CI4 framework — including Shield authentication.
 
-- **`/ci4`** - Core CI4 framework: MVC conventions, routing, controllers, models, query builder, views, migrations, filters, Spark CLI, and Shield auth.
-- **`/ci4-api`** - Building robust REST APIs with CI4: response envelopes, versioning, token auth, validation, rate limiting, CORS, and webhooks.
+- **`ci4`** — Core CI4 framework: MVC conventions, routing, controllers, models, query builder, views, migrations, filters, Spark CLI.
+- **`ci4-api`** — Building robust REST APIs with CI4: response envelopes, versioning, token auth, validation, rate limiting, CORS, and webhooks.
+- **`ci4-shield`** — Shield authentication & authorization: session auth, access tokens, HMAC, JWT, groups, permissions, email activation, 2FA, magic links.
+
+Each skill has a lean SKILL.md (~200-350 lines) that loads automatically, plus a `references/` directory with comprehensive deep-dive docs that are pulled on demand — keeping context usage efficient.
 
 ---
 
@@ -22,205 +25,55 @@ cd ~/.claude/skills
 git clone https://github.com/enlivenapp/Codeigniter4-App-and-API-Skills-for-Claude-Code.git
 cp -r Codeigniter4-App-and-API-Skills-for-Claude-Code/ci4 .
 cp -r Codeigniter4-App-and-API-Skills-for-Claude-Code/ci4-api .
+cp -r Codeigniter4-App-and-API-Skills-for-Claude-Code/ci4-shield .
 ```
 
-Restart Claude Code. The skills are now available as `/ci4` and `/ci4-api`. In your Claude Code session, simply type `/ci4` or `/ci4-api` to invoke the relevant skill. Claude will load the full framework reference and apply it to your project automatically.
+Restart Claude Code. The skills are now available. Claude will automatically activate the relevant skill when it detects CI4-related work.
 
 ---
 
-## Setting Up a CI4 Project from Scratch
+## What's Included
 
-Start here every time. This gets you to a known, working base before writing any application code.
+### ci4 (12 reference docs)
 
-### Requirements
+| Reference | Coverage |
+|---|---|
+| `routing.md` | Groups, placeholders, named routes, resource routes, CLI routes |
+| `controllers.md` | ResourceController, request data, file uploads, validation, redirects |
+| `models.md` | CRUD, soft deletes, pagination, scopes, callbacks, entities |
+| `query-builder.md` | SELECT, WHERE, JOIN, batch ops, subqueries, transactions |
+| `views.md` | Layouts, sections, partials, view cells, caching |
+| `filters.md` | Creating, registering, global filters, arguments |
+| `database.md` | Migrations, seeds, forge, field types |
+| `validation.md` | All built-in rules, custom rules, file upload validation |
+| `services-helpers.md` | Services, helpers, caching, email, sessions, encryption, HTTP client |
+| `spark-cli.md` | All spark commands, generators, custom commands |
+| `testing.md` | PHPUnit, feature tests, database tests, mocking |
+| `gotchas.md` | Critical pitfalls, CI4 vs Laravel comparison |
 
-- PHP 8.1+
-- Composer
-- MySQL (or another supported DB)
-- A web server (Apache/Nginx) or use `php spark serve` for local dev
+### ci4-api (6 reference docs)
 
-### 1. Create the Project
+| Reference | Coverage |
+|---|---|
+| `base-controller.md` | BaseApiController, response helpers, auth helpers |
+| `authentication.md` | Login/register/logout endpoints, token lifecycle, filters |
+| `webhooks.md` | Receiving (Stripe, GitHub), sending, signature verification |
+| `rate-limiting.md` | Throttle filter, per-route limits, inline throttling |
+| `cors.md` | CORS filter, preflight, production config |
+| `error-handling.md` | Status code guide, error envelope, global exception handler |
 
-```bash
-composer create-project codeigniter4/appstarter my-app
-cd my-app
-```
+### ci4-shield (8 reference docs)
 
-> Official docs: https://codeigniter.com/user_guide/installation/installing_composer.html
-
-### 2. Configure the Environment
-
-```bash
-cp env .env
-```
-
-Open `.env` and set:
-
-```ini
-CI_ENVIRONMENT = development
-
-# Must have trailing slash
-app.baseURL = 'http://localhost:8080/'
-
-# Database
-database.default.hostname = localhost
-database.default.database = your_database
-database.default.username = your_user
-database.default.password = your_password
-database.default.DBDriver = MySQLi
-```
-
-### 3. Generate Encryption Key
-
-```bash
-php spark key:generate
-```
-
-Writes the key directly into your `.env`. Run this once per project.
-
-### 4. Clean URLs (Optional but Recommended)
-
-In `app/Config/App.php`, set:
-
-```php
-public string $indexPage = '';
-```
-
-Make sure your web server has URL rewriting enabled (Apache `.htaccess` is included by default in the appstarter).
-
-### 5. Start the Dev Server
-
-```bash
-php spark serve
-```
-
-Visit `http://localhost:8080` and you should see the CI4 welcome page.
-
-> **Never use `spark serve` in production.** It is single-threaded and not suitable for real traffic. Use Apache or Nginx.
-
----
-
-## Adding Shield (Authentication)
-
-Shield is the official CI4 authentication and authorization library.
-
-> Official docs: https://shield.codeigniter.com/getting_started/install/
-
-### 1. Install via Composer
-
-```bash
-composer require codeigniter4/shield
-```
-
-### 2. Run Shield Setup
-
-```bash
-php spark shield:setup
-```
-
-This command:
-- Publishes `Auth.php`, `AuthGroups.php`, and `AuthToken.php` to `app/Config/`
-- Wires up auth helpers in `app/Config/Autoload.php`
-- Adds Shield routes to `app/Config/Routes.php`
-- Prompts to run migrations. Say **yes**.
-
-### 3. Run Migrations (if not run during setup)
-
-```bash
-php spark migrate --all
-```
-
-Shield creates these tables:
-- `auth_identities` - emails, usernames, passwords
-- `auth_tokens` - personal access tokens (for API auth)
-- `auth_token_logins` - token login history
-- `auth_groups_users` - user group assignments
-- `auth_permissions_users` - per-user permission overrides
-
-Verify with:
-```bash
-php spark migrate:status
-```
-
-### 4. Configure Groups
-
-Edit `app/Config/AuthGroups.php` to define your groups. Shield ships with these defaults:
-
-```php
-public array $groups = [
-    'superadmin' => ['title' => 'Super Admin', 'description' => 'Complete control of the site.'],
-    'admin'      => ['title' => 'Admin',       'description' => 'Day to day administrators of the site.'],
-    'developer'  => ['title' => 'Developer',   'description' => 'Site programmers.'],
-    'user'       => ['title' => 'User',        'description' => 'General users of the site. Often customers.'],
-    'beta'       => ['title' => 'Beta User',   'description' => 'Has access to beta-level features.'],
-];
-```
-
-Add, remove, or rename groups to match your application's needs.
-
-### 5. Create Your First Admin User
-
-**Interactive (recommended for getting started):**
-
-```bash
-php spark shield:user create
-php spark shield:user addgroup <username> superadmin
-```
-
-**Programmatic (seeder - good for repeatable dev environments):**
-
-```bash
-php spark make:seeder AdminSeeder
-```
-
-```php
-<?php
-namespace App\Database\Seeds;
-
-use CodeIgniter\Database\Seeder;
-use CodeIgniter\Shield\Entities\User;
-
-class AdminSeeder extends Seeder
-{
-    public function run(): void
-    {
-        $users = auth()->getProvider();
-
-        $user = new User([
-            'username' => 'admin',
-            'email'    => 'admin@example.com',
-            'password' => 'change-me-immediately',
-        ]);
-
-        $users->save($user);
-        $user = $users->findById($users->getInsertID());
-        $users->addToGroup($user, 'superadmin');
-    }
-}
-```
-
-```bash
-php spark db:seed AdminSeeder
-```
-
----
-
-## Full Setup Checklist
-
-```bash
-composer create-project codeigniter4/appstarter my-app
-cd my-app
-cp env .env
-# Edit .env: CI_ENVIRONMENT, app.baseURL, database credentials
-php spark key:generate
-composer require codeigniter4/shield
-php spark shield:setup          # say yes to migrations
-php spark shield:user create
-php spark shield:user addgroup <username> superadmin
-php spark serve
-```
-
-You now have a working CI4 + Shield installation. Type `/ci4` or `/ci4-api` in your Claude Code session to get started.
+| Reference | Coverage |
+|---|---|
+| `configuration.md` | Auth.php, AuthGroups.php, password validators, JWT config |
+| `session-auth.md` | Login/logout flow, remember me, checking auth state |
+| `token-auth.md` | Access tokens, HMAC tokens, JWT, scopes, mobile login |
+| `groups-permissions.md` | Groups, permissions, matrix, wildcards, direct permissions |
+| `user-model.md` | User entity, UserModel, extending, CRUD, banning, force reset |
+| `filters.md` | All Shield filters, route protection, filter order, chain filter |
+| `actions.md` | Email activation, Email 2FA, magic links, password handling |
+| `events-customization.md` | Events, custom views, extending controllers, routes, testing |
 
 ---
 
@@ -228,8 +81,6 @@ You now have a working CI4 + Shield installation. Type `/ci4` or `/ci4-api` in y
 
 - [CodeIgniter 4 User Guide](https://codeigniter.com/user_guide/)
 - [CodeIgniter 4 Installation](https://codeigniter.com/user_guide/installation/installing_composer.html)
-- [CodeIgniter 4 on GitHub](https://github.com/codeigniter4/CodeIgniter4)
 - [CodeIgniter Shield Docs](https://shield.codeigniter.com/)
+- [CodeIgniter 4 on GitHub](https://github.com/codeigniter4/CodeIgniter4)
 - [CodeIgniter Shield on GitHub](https://github.com/codeigniter4/shield)
-- [CodeIgniter Forum](https://forum.codeigniter.com/)
-- [CodeIgniter on Slack](https://codeigniterchat.slack.com/)
