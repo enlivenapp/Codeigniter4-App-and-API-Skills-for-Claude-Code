@@ -5,6 +5,10 @@ A trio of Claude Code skills for building with CodeIgniter 4. Designed to give C
 - **`ci4`** — Core CI4 framework: MVC conventions, routing, controllers, models, query builder, views, migrations, filters, Spark CLI.
 - **`ci4-api`** — Building robust REST APIs with CI4: response envelopes, versioning, token auth, validation, rate limiting, CORS, and webhooks.
 - **`ci4-shield`** — Shield authentication & authorization: session auth, access tokens, HMAC, JWT, groups, permissions, email activation, 2FA, magic links.
+- **`ci4-advanced`** — Covers advanced CI4 techniques for working outside app/: runtime
+addNamespace(), namespace-isolated migrations/seeds/commands, Registrars,
+module auto-discovery, service overrides, runtime config mutation, event
+bootstrap, and dynamic route inclusion.
 
 Each skill has a lean SKILL.md (~200-350 lines) that loads automatically, plus a `references/` directory with comprehensive deep-dive docs that are pulled on demand — keeping context usage efficient.
 
@@ -26,9 +30,10 @@ git clone https://github.com/enlivenapp/Codeigniter4-App-and-API-Skills-for-Clau
 cp -r Codeigniter4-App-and-API-Skills-for-Claude-Code/ci4 .
 cp -r Codeigniter4-App-and-API-Skills-for-Claude-Code/ci4-api .
 cp -r Codeigniter4-App-and-API-Skills-for-Claude-Code/ci4-shield .
+cp -r Codeigniter4-App-and-API-Skills-for-Claude-Code/ci4-advanced .
 ```
 
-Restart Claude Code. The skills are now available. Claude will automatically activate the relevant skill when it detects CI4-related work.
+Restart Claude Code. The skills are now available. Claude will automatically activate the relevant skill when it detects CI4-related work or loading via `/ci4-{name}`.
 
 ---
 
@@ -74,6 +79,15 @@ Restart Claude Code. The skills are now available. Claude will automatically act
 | `filters.md` | All Shield filters, route protection, filter order, chain filter |
 | `actions.md` | Email activation, Email 2FA, magic links, password handling |
 | `events-customization.md` | Events, custom views, extending controllers, routes, testing |
+
+### ci4-advanced (4 reference docs)
+
+| Reference | Coverage |
+|---|---|
+| `external-subsystems.md` | How to run CI4's built-in subsystems (migrations, seeds, commands, View Cells, filters, validation) from code outside `app/`. |
+| `registrar-and-discovery.md` | A Registrar is a class that merges configuration values into CI4 config objects at instantiation time. Any registered namespace can ship one. |
+| `runtime-config.md` | Registrar pattern, Config/Modules.php auto-discovery |
+| `runtime-namespaces.md` | Mutating shared config instances, event bootstrap, dynamic routes |
 
 ---
 
